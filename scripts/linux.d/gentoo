@@ -1,0 +1,67 @@
+#!/bin/bash
+# these are the Gentoo Linux specific build functions
+export FOUND_GTK3
+if command -v qlist &> /dev/null; then
+    FOUND_GTK3=$(qlist -I x11-libs/gtk+ 2>/dev/null) || FOUND_GTK3=""
+else
+    FOUND_GTK3=""
+    echo "Warning: qlist command not available" >&2
+fi
+echo -n -e "$FOUND_GTK3"
+
+echo -n -e "Update lib: $UPDATE_LIB"
+
+# Addtional Dev packages for OrcaSlicer
+export REQUIRED_DEV_PACKAGES=(
+    dev-build/cmake
+    net-misc/curl
+    sys-apps/dbus
+    gui-libs/eglexternalplatform
+    kde-frameworks/extra-cmake-modules
+    sys-apps/file
+    sys-devel/gettext
+    dev-vcs/git
+    media-libs/glew
+    media-libs/gstreamer
+    dev-cpp/gstreamermm
+    x11-libs/gtk+
+    dev-libs/imath
+    dev-libs/libmpack
+    app-crypt/libsecret
+    dev-libs/libspnav
+    media-libs/mesa
+    dev-build/ninja
+    dev-libs/openssl
+    sys-apps/texinfo
+    dev-libs/wayland
+    net-libs/webkit-gtk
+    net-misc/wget
+    x11-libs/wxGTK
+)
+
+if [[ -n "$UPDATE_LIB" ]]
+then
+    echo -n -e "Updating linux ...\n"
+    NEEDED_PKGS=()
+    for PKG in "${REQUIRED_DEV_PACKAGES[@]}"; do
+	echo -e -n "Checking ${PKG}\n"
+        qlist -I  "${PKG}" > /dev/null || NEEDED_PKGS+=("${PKG}")
+    done
+
+    echo -e -n "${NEEDED_PKGS[@]}"
+
+    if [[ "${#NEEDED_PKGS[*]}" -gt 0 ]]; then
+	USE="wayland webkit" emerge --newuse --autounmask-write --autounmask-backtrack=y "${NEEDED_PKGS[@]}"
+    fi
+    echo -e "done\n"
+    exit 0
+fi
+
+export ORCA_EXTRA_BUILD_ARGS="\
+-DSLIC3R_STATIC=OFF \
+-DOPENVDB_FIND_MODULE_PATH=/usr/lib64/cmake/OpenVDB \
+-DCMAKE_PREFIX_PATH=/usr \
+-DCMAKE_CXX_FLAGS_INIT=\"-I/usr/include/opencv4\""
+
+export FOUND_GTK3_DEV
+FOUND_GTK3_DEV=${FOUND_GTK3}
