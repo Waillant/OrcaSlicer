@@ -5,6 +5,7 @@
 #include <admesh/stl.h> // indexed_triangle_set
 #include "ExPolygon.hpp"
 #include "Emboss.hpp" // IProjection
+#include <CGAL/AABB_tree.h>
 
 namespace Slic3r{
 

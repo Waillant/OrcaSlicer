@@ -115,11 +115,11 @@ private:
     {
     public:
         HttpServer&                        server;
-        boost::asio::io_service            io_service;
+        boost::asio::io_context            io_context;
         boost::asio::ip::tcp::acceptor     acceptor;
         std::set<std::shared_ptr<session>> sessions;
 
-        IOServer(HttpServer& server) : server(server), acceptor(io_service, {boost::asio::ip::tcp::v4(), server.port}) {}
+        IOServer(HttpServer& server) : server(server), acceptor(io_context, {boost::asio::ip::tcp::v4(), server.port}) {}
 
         void do_accept();
 
